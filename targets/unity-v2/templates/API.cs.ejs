@@ -1,4 +1,4 @@
-<% if(api.name == "Admin"){%>#if ENABLE_PLAYFABADMIN_API<%}else if(api.name == "Server" || api.name == "Matchmaker"){%>#if ENABLE_PLAYFABSERVER_API<%}else{%>#if !DISABLE_PLAYFABCLIENT_API<%}%>
+<% if(api.name == "Admin"){ %>#if ENABLE_PLAYFABADMIN_API<% }else if(api.name == "Server" || api.name == "Matchmaker"){ %>#if ENABLE_PLAYFABSERVER_API<% }else{ %>#if !DISABLE_PLAYFABCLIENT_API<% } %>
 using System;
 using PlayFab.<%- api.name %>Models;
 using PlayFab.Internal;
@@ -6,7 +6,9 @@ using PlayFab.Internal;
 namespace PlayFab
 {
 <%- GenerateSummary("    ", api, "description")
-%>    public static class PlayFab<%- api.name %>API
+%><% }
+isPartial = (api.name == "Client") ? " partial" : "";
+ %>    public static<%- isPartial %> class PlayFab<%- api.name %>API
     {
 <%if(api.name == "Client") { %>
         /// <summary>
@@ -17,7 +19,7 @@ namespace PlayFab
         {
             return PlayFabHttp.IsClientLoggedIn();
         }
-<%}%>
+<% } %>
 <% for(var i in api.calls) { var apiCall = api.calls[i]; %><%- GenerateSummary("        ", apiCall, "summary") %><%- GetDeprecationAttribute("        ", apiCall)
 %>        public static void <%- apiCall.name %>(<%- apiCall.request %> request, Action<<%- apiCall.result %>> resultCallback, Action<PlayFabError> errorCallback, object customData = null)
         {
