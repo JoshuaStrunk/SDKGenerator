@@ -2,38 +2,72 @@
 using System.Collections;
 using strange.extensions.command.api;
 using strange.extensions.command.impl;
-using strange.extensions.context.impl;
+using strange.extensions.injector.api;
+using strange.extensions.mediation.api;
 
-public class PlayFabContext : MVCSContext
+
+public class PlayFabContextManager : StrangePackage
 {
-    public PlayFabContextMediator playFabContext;
-
-    public PlayFabContext(MonoBehaviour ctxView, bool autoMap) : base(ctxView, autoMap)
+    public override void MapBindings(ICommandBinder commandBinder, ICrossContextInjectionBinder injectionBinder,
+        IMediationBinder mediationBinder)
     {
-        playFabContext = (PlayFabContextMediator)ctxView;
-    }
-
-    protected override void addCoreComponents()
-    {
-        base.addCoreComponents();
-        injectionBinder.Unbind<ICommandBinder>();
-        injectionBinder.Bind<ICommandBinder>().To<SignalCommandBinder>().ToSingleton();
-    }
-
-    protected override void mapBindings()
-    {
+        var PlayFabDataStore = FindObjectOfType<PlayFabDataStore>();
+        injectionBinder.Bind<PlayFabDataStore>().To(PlayFabDataStore).ToSingleton();
 
         //Bind Signals Cross Context
-        injectionBinder.Bind<LoadPlayFabDataSignal>().CrossContext();
-        injectionBinder.Bind<GetLinkTypeSignal>().CrossContext();
-        injectionBinder.Bind<GetPlatFormSignal>().CrossContext();
-        injectionBinder.Bind<LoginToPlayFabSignal>().CrossContext();
+        injectionBinder.Bind<LoadPlayFabDataSignal>();
+        injectionBinder.Bind<GetLinkTypeSignal>();
+        injectionBinder.Bind<GetPlatFormSignal>();
+        injectionBinder.Bind<LoginToPlayFabSignal>();
         //Bind Response Signals Cross Context
-        injectionBinder.Bind<LoginToPlayFabResponseSignal>().CrossContext();<% for(var i=0; i< api.subgroups.length; i++){ %><% var subgroup = api.subgroups[i]; %>
+        injectionBinder.Bind<LoginToPlayFabResponseSignal>();<% for(var i=0; i< api.subgroups.length; i++){ %><% var subgroup = api.subgroups[i]; %>
         //<%-subgroup.name%>
-        #region <%-subgroup.name%><% for(var x=0; x<subgroup.methods.length; x++){ %><% var apiCall = api.calls.filter(function(el){ return el.name === subgroup.methods[x]; })[0];%><% if( !apiCall ) { %><% continue; %><% } %>
-        injectionBinder.Bind<<%-apiCall.name%>Signal>().CrossContext();
-        injectionBinder.Bind<<%-apiCall.name%>ResponseSignal>().CrossContext();<%}%>
+        #region <%-subgroup.name%><% for(var x=0; x<subgroup.methods.length; x++){ %><% var apiCall = api.calls.filter(function(el){ return el.name === subgroup.methods[x]; })[0];%><% if( !apiCall || GetDeprecationStatus(apiCall) != null) { %><% continue; %><% } %>
+        injectionBinder.Bind<<%-apiCall.name%>Signal>();
+        injectionBinder.Bind<<%-apiCall.name%>ResponseSignal>();
+        commandBinder.Bind<<%-apiCall.name%>Signal>().To<<%-apiCall.name%>Command>();
+        commandBinder.Bind<<%-apiCall.name%>ResponseSignal>();<%}%>
         #endregion<%}%>
+
     }
+
+    public override void PostBindings(ICommandBinder commandBinder, ICrossContextInjectionBinder injectionBinder,
+        IMediationBinder mediationBinder)
+    {
+        base.PostBindings(commandBinder, injectionBinder, mediationBinder);
+    }
+
+    public override void Launch(ICrossContextInjectionBinder injectionBinder)
+    {
+        base.Launch(injectionBinder);
+    }
+
+    public static void CreateLoginResponseGeneric<T>(ICommandBinder commandBinder)
+    {
+        commandBinder.Bind<LoginWithAndroidDeviceIDResponseSignal>().To<T>();
+        commandBinder.Bind<LoginWithIOSDeviceIDResponseSignal>().To<T>();
+        commandBinder.Bind<LoginWithCustomIDResponseSignal>().To<T>();
+        commandBinder.Bind<LoginWithEmailAddressResponseSignal>().To<T>();
+        commandBinder.Bind<LoginWithFacebookResponseSignal>().To<T>();
+        commandBinder.Bind<LoginWithGoogleAccountResponseSignal>().To<T>();
+        commandBinder.Bind<LoginWithKongregateResponseSignal>().To<T>();
+        commandBinder.Bind<LoginWithPlayFabResponseSignal>().To<T>();
+        commandBinder.Bind<LoginWithSteamResponseSignal>().To<T>();
+        commandBinder.Bind<LoginWithGameCenterResponseSignal>().To<T>();
+    }
+
+    public static void GenericResponseBinder<T>(ICommandBinder commandBinder)
+    {
+        commandBinder.Bind<T>().To<GenericEmptyResponseCommand>();
+    }
+
+    public class GenericEmptyResponseCommand : Command
+    {
+        public override void Execute()
+        {
+            Release();
+            //Do Nothing, because we are here just to not produce errors.
+        }
+    }
+
 }

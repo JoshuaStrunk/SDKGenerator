@@ -9,8 +9,7 @@ public class SetupPlayFabCommand : Command
     [Inject] public PlayFabDataStore PlayFabDataStore { get; set; }
     public override void Execute()
     {
-        PlayFabSettings.TitleId = PlayFabDataStore.TitleId;
-        PlayFabSettings.RequestType = WebRequestType.UnityWww;
+
     }
 }
 
@@ -41,7 +40,7 @@ public class LoginToPlayFabCommand : Command
                     AndroidDevice = SystemInfo.deviceModel,
                     CreateAccount = true,
                     OS = SystemInfo.operatingSystem,
-                    TitleId = PlayFabDataStore.TitleId
+                    TitleId = PlayFabSettings.TitleId
                 });
             break;
             case LoginLinkType.Ios:
@@ -51,7 +50,7 @@ public class LoginToPlayFabCommand : Command
                     DeviceModel = SystemInfo.deviceModel,
                     OS = SystemInfo.operatingSystem,
                     CreateAccount = true,
-                    TitleId = PlayFabDataStore.TitleId
+                    TitleId = PlayFabSettings.TitleId
                 });
             break;
             case LoginLinkType.Facebook:
@@ -59,7 +58,7 @@ public class LoginToPlayFabCommand : Command
                 {
                     AccessToken = PlayFabDataStore.FBAccessToken,
                     CreateAccount = true,
-                    TitleId = PlayFabDataStore.TitleId
+                    TitleId = PlayFabSettings.TitleId
                 });
             break;
             case LoginLinkType.Kongregate:
@@ -68,7 +67,7 @@ public class LoginToPlayFabCommand : Command
                     AuthTicket = PlayFabDataStore.KongAuthTicket,
                     KongregateId = PlayFabDataStore.KongregateId,
                     CreateAccount = true,
-                    TitleId = PlayFabDataStore.TitleId
+                    TitleId = PlayFabSettings.TitleId
                 });
             break;
             case LoginLinkType.Steam:
@@ -76,7 +75,7 @@ public class LoginToPlayFabCommand : Command
                 {
                     SteamTicket = PlayFabDataStore.SteamTicket,
                     CreateAccount = true,
-                    TitleId = PlayFabDataStore.TitleId
+                    TitleId = PlayFabSettings.TitleId
                 });
             break;
             case LoginLinkType.GameCenter:
@@ -84,16 +83,15 @@ public class LoginToPlayFabCommand : Command
                 {
                     PlayerId = PlayFabDataStore.GameCenterPlayerId,
                     CreateAccount = true,
-                    TitleId = PlayFabDataStore.TitleId
+                    TitleId = PlayFabSettings.TitleId
                 });
             break;
             case LoginLinkType.Google:
                 LoginGoogleSignal.Dispatch(new LoginWithGoogleAccountRequest()
                 {
-                    PublisherId = PlayFabDataStore.GooglePublisherId,
                     AccessToken = PlayFabDataStore.GoogleTicket,
                     CreateAccount = true,
-                    TitleId = PlayFabDataStore.TitleId
+                    TitleId = PlayFabSettings.TitleId
                 });
             break;
             case LoginLinkType.Custom:
@@ -102,7 +100,7 @@ public class LoginToPlayFabCommand : Command
                 {
                     CustomId = PlayFabDataStore.DeviceId,
                     CreateAccount = true,
-                    TitleId = PlayFabDataStore.TitleId
+                    TitleId = PlayFabSettings.TitleId
                 });
             break;
         }
@@ -210,7 +208,7 @@ public class LoginHelper
 <% for(var i=0; i< api.subgroups.length; i++){ %><% var subgroup = api.subgroups[i]; %>
 //<%-subgroup.name%>
 #region <%-subgroup.name%>
-<% for(var x=0; x<subgroup.methods.length; x++){ %><% var apiCall = api.calls.filter(function(el){ return el.name === subgroup.methods[x]; })[0];%><% if( !apiCall ) { %><% continue; %><% } %>
+<% for(var x=0; x<subgroup.methods.length; x++){ %><% var apiCall = api.calls.filter(function(el){ return el.name === subgroup.methods[x]; })[0];%><% if( !apiCall || GetDeprecationStatus(apiCall) != null) { %><% continue; %><% } %>
 ///<summary>
 ///<%- apiCall.summary%>
 ///</summary>

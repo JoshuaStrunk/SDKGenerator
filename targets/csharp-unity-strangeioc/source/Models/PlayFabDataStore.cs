@@ -24,7 +24,6 @@ public class PlayFabDataStore : View
     public string FBAccessToken;
     public string KongAuthTicket;
     public string SteamTicket;
-    public string GooglePublisherId;
     public string GoogleTicket;
 
     public DateTime SessionExpires;

@@ -8,7 +8,6 @@ exports.makeClientAPI = function (api, sourceDir, apiOutputDir) {
     copyTree(path.resolve(sourceDir, "source"), baseApiOutputDir);
     makeSignals(api, sourceDir, baseApiOutputDir + "/Signals/");
     makeCommands(api, sourceDir, baseApiOutputDir + "/Commands/");
-    makeBindingsFactory(api, sourceDir, baseApiOutputDir + "/Factories/");
     makeContext(api, sourceDir, baseApiOutputDir);
     //var testingOutputDir = path.resolve(apiOutputDir, "_ClientTesting");
     //console.log("  - Copying client SDK to\n  -> " + testingOutputDir);
@@ -61,23 +60,9 @@ function makeContext(api, sourceDir, apiOutputDir) {
     var apiLocals = {};
     apiLocals.api = api;
     var generatedApi = apiTemplate(apiLocals);
-    writeFile(path.resolve(apiOutputDir, "PlayFabContext.cs"), generatedApi);
+    writeFile(path.resolve(apiOutputDir, "PlayFabContextManager.cs"), generatedApi);
 
 }
-function makeBindingsFactory(api, sourceDir, apiOutputDir) {
-    console.log("   - Generating C# " + api.name + " library to\n   -> " + apiOutputDir);
-
-    var templateDir = path.resolve(sourceDir, "templates");
-
-    //Write Signals
-    var apiTemplate = ejs.compile(readFile(path.resolve(templateDir, "strangeioc-playfab-contextbindings.ejs")));
-    var apiLocals = {};
-    apiLocals.api = api;
-    var generatedApi = apiTemplate(apiLocals);
-    writeFile(path.resolve(apiOutputDir, "PlayFabBindingsFactory.cs"), generatedApi);
-
-}
-
 
 function getModelPropertyDef(property, datatype) {
     var basicType = getPropertyCSType(property, datatype, false);

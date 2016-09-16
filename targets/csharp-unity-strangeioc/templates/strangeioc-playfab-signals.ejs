@@ -17,7 +17,7 @@ public class LoginToPlayFabResponseSignal: Signal{}
     <% var subgroup = api.subgroups[i]; %>
 //<%-subgroup.name%>
 #region <%-subgroup.name%>
-    <% for(var x=0; x<subgroup.methods.length; x++){ %><% var apiCall = api.calls.filter(function(el){ return el.name === subgroup.methods[x]; })[0];%><% if( !apiCall ) { %><% continue; %><% } %>
+    <% for(var x=0; x<subgroup.methods.length; x++){ %><% var apiCall = api.calls.filter(function(el){ return el.name === subgroup.methods[x]; })[0];%><% if( !apiCall || GetDeprecationStatus(apiCall) != null ) { %><% continue; %><% } %>
     ///<summary>
     ///<%- apiCall.summary%>
     ///</summary>
@@ -31,7 +31,7 @@ public class LoginToPlayFabResponseSignal: Signal{}
 <% for(var i=0; i< api.subgroups.length; i++){ %><% var subgroup = api.subgroups[i]; %>
 //<%-subgroup.name%>
 #region <%-subgroup.name%>
-<% for(var x=0; x<subgroup.methods.length; x++){ %><% var apiCall = api.calls.filter(function(el){ return el.name === subgroup.methods[x]; })[0];%><% if( !apiCall ) { %><% continue; %><% } %>
+<% for(var x=0; x<subgroup.methods.length; x++){ %><% var apiCall = api.calls.filter(function(el){ return el.name === subgroup.methods[x]; })[0];%><% if( !apiCall || GetDeprecationStatus(apiCall) != null) { %><% continue; %><% } %>
     ///<summary>
     ///<%- apiCall.summary%>
     ///</summary>
